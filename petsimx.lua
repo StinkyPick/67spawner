@@ -2,8 +2,8 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Steal a Brainrot",
-   LoadingTitle = "Steal a Brainrot",
+   Name = "Steal a Brainrot Hub",
+   LoadingTitle = "Steal a Brainrot Hub",
    LoadingSubtitle = "by yfk",
    ConfigurationSaving = {Enabled = false}
 })
@@ -110,7 +110,8 @@ MainTab:CreateToggle({
                         if not autoCollect then break end
                         if obj:IsA("TouchTransmitter") and obj.Parent:IsA("BasePart") then
                             hrp.CFrame = obj.Parent.CFrame * CFrame.new(0,-2,0)
-                            task.wait(5) -- stay on part for 5 seconds
+                            task.wait(3) -- stay on part for 3 seconds
+                            task.wait(1) -- wait 1 second before next part
                         end
                     end
                     hrp.CFrame = oldCFrame

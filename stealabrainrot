@@ -1,43 +1,69 @@
--- Steal a Brainrot Key System + Script (Delta Executor, No Rayfield)
-
--- Correct key
-local correctKey = "food"
-
--- Ask user for the key
-local input = game:GetService("Players").LocalPlayer:PromptInput("Enter Key:", "")
-
-if input ~= correctKey then
-    print("Wrong key! Script stopped.")
-    return -- stop the script
-end
-
-print("Key correct! Access granted.")
-
--- ===== START OF MAIN SCRIPT =====
--- Example Steal a Brainrot features without Rayfield
+-- Steal a Brainrot Mobile Key System + Script (Delta Executor)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
+-- ===== KEY SYSTEM =====
+local correctKey = "food"
+local input = LocalPlayer:PromptInput("Enter Key:", "")
+
+if input ~= correctKey then
+    print("Wrong key! Script stopped.")
+    return -- stop script
+end
+
+print("Key correct! Access granted.")
+
+-- ===== MAIN SCRIPT =====
+
 -- Settings
 local Speed = 100
 local JumpPower = 150
-local TeleportDistance = 20
-local BasePosition = RootPart.Position
 local AutoSteal = true
 local Noclip = true
+local TeleportDistance = 20
+local BasePosition = RootPart.Position
 
--- Apply Speed / Jump
+-- Apply Speed and JumpPower
 Humanoid.WalkSpeed = Speed
 Humanoid.JumpPower = JumpPower
 
--- Noclip Loop
+-- ===== MOBILE INPUT FUNCTIONS =====
+-- Use PromptInput for actions instead of keyboard
+
+local function TeleportForward()
+    RootPart.CFrame = RootPart.CFrame + RootPart.CFrame.LookVector * TeleportDistance
+end
+
+local function TeleportBackward()
+    RootPart.CFrame = RootPart.CFrame - RootPart.CFrame.LookVector * TeleportDistance
+end
+
+local function SaveBase()
+    BasePosition = RootPart.Position
+    print("Base saved!")
+end
+
+local function TeleportToBase()
+    RootPart.CFrame = CFrame.new(BasePosition)
+    print("Teleported to base!")
+end
+
+-- ===== AUTO STEAL =====
+RunService.RenderStepped:Connect(function()
+    if AutoSteal then
+        local tool = Character:FindFirstChildWhichIsA("Tool")
+        if tool and tool.Name == "Brainrot" then
+            RootPart.CFrame = CFrame.new(BasePosition)
+        end
+    end
+end)
+
+-- ===== NOCIP =====
 RunService.Stepped:Connect(function()
     if Noclip then
         for _, part in pairs(Character:GetDescendants()) do
@@ -48,26 +74,18 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- Auto Steal
-RunService.RenderStepped:Connect(function()
-    if AutoSteal then
-        local tool = Character:FindFirstChildWhichIsA("Tool")
-        if tool and tool.Name == "Brainrot" then
-            RootPart.CFrame = CFrame.new(BasePosition)
-        end
+-- ===== MOBILE BUTTON MENU =====
+while true do
+    local action = LocalPlayer:PromptInput("Enter Action: forward/backward/savebase/tobase", "")
+    if action == "forward" then
+        TeleportForward()
+    elseif action == "backward" then
+        TeleportBackward()
+    elseif action == "savebase" then
+        SaveBase()
+    elseif action == "tobase" then
+        TeleportToBase()
+    else
+        print("Invalid action!")
     end
-end)
-
--- Teleport Forward / Backward
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.E then
-        RootPart.CFrame = RootPart.CFrame + RootPart.CFrame.LookVector * TeleportDistance
-    elseif input.KeyCode == Enum.KeyCode.Q then
-        RootPart.CFrame = RootPart.CFrame - RootPart.CFrame.LookVector * TeleportDistance
-    elseif input.KeyCode == Enum.KeyCode.B then
-        BasePosition = RootPart.Position
-        print("Base saved!")
-    end
-end)
-
-print("Steal a Brainrot script loaded successfully!")
+end

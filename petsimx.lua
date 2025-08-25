@@ -2,8 +2,8 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Steal a Brainrot Hub",
-   LoadingTitle = "Steal a Brainrot Hub",
+   Name = "Steal a Brainrot",
+   LoadingTitle = "Steal a Brainrot",
    LoadingSubtitle = "by yfk",
    ConfigurationSaving = {Enabled = false}
 })
@@ -13,7 +13,6 @@ local MainTab = Window:CreateTab("Main", 4483362458)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TeleportService = game:GetService("TeleportService")
 local Player = Players.LocalPlayer
 
 --// Walkspeed
@@ -111,7 +110,7 @@ MainTab:CreateToggle({
                         if not autoCollect then break end
                         if obj:IsA("TouchTransmitter") and obj.Parent:IsA("BasePart") then
                             hrp.CFrame = obj.Parent.CFrame * CFrame.new(0,-2,0)
-                            task.wait(0.5)
+                            task.wait(5) -- stay on part for 5 seconds
                         end
                     end
                     hrp.CFrame = oldCFrame
@@ -121,41 +120,33 @@ MainTab:CreateToggle({
     end
 })
 
---// Anti Kick
-local antiKick = false
-MainTab:CreateToggle({
-    Name = "Anti Kick",
-    CurrentValue = false,
-    Callback = function(v)
-        antiKick = v
-        if v then
-            local mt = getrawmetatable(game)
-            local oldNamecall = mt.__namecall
-            setreadonly(mt,false)
-            mt.__namecall = newcclosure(function(self,...)
-                if getnamecallmethod()=="Kick" or getnamecallmethod()=="kick" then
-                    warn("[ANTI-KICK] Blocked kick attempt")
-                    return nil
-                end
-                return oldNamecall(self,...)
-            end)
-            Player.Kick = function(...) warn("[ANTI-KICK] Blocked kick attempt") end
-        end
+--// Anti Kick (Button)
+MainTab:CreateButton({
+    Name = "Activate Anti Kick",
+    Callback = function()
+        local mt = getrawmetatable(game)
+        local oldNamecall = mt.__namecall
+        setreadonly(mt,false)
+        mt.__namecall = newcclosure(function(self,...)
+            if getnamecallmethod()=="Kick" or getnamecallmethod()=="kick" then
+                warn("[ANTI-KICK] Blocked kick attempt")
+                return nil
+            end
+            return oldNamecall(self,...)
+        end)
+        Player.Kick = function(...) warn("[ANTI-KICK] Blocked kick attempt") end
+        Rayfield:Notify({Title="Anti Kick",Content="Protection Activated",Duration=3})
     end
 })
 
---// Anti Ban
-local antiBan = false
-MainTab:CreateToggle({
-    Name = "Anti Ban",
-    CurrentValue = false,
-    Callback = function(v)
-        antiBan = v
-        if v then
-            game:BindToClose(function()
-                warn("[ANTI-BAN] Blocked bind to close!")
-                task.wait(9e9) -- freeze instead of closing
-            end)
-        end
+--// Anti Ban (Button)
+MainTab:CreateButton({
+    Name = "Activate Anti Ban",
+    Callback = function()
+        game:BindToClose(function()
+            warn("[ANTI-BAN] Blocked bind to close!")
+            task.wait(9e9) -- freeze game instead of closing
+        end)
+        Rayfield:Notify({Title="Anti Ban",Content="Protection Activated",Duration=3})
     end
 })

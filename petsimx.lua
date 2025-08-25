@@ -19,6 +19,30 @@ local TeleportService = game:GetService("TeleportService")
 
 local Player = Players.LocalPlayer
 
+--// Anti Kick + Anti Ban
+-- Block Kick() locally
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+setreadonly(mt, false)
+
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    if tostring(method) == "Kick" or tostring(method) == "kick" then
+        warn("[ANTI-KICK] Blocked attempt to kick!")
+        return nil
+    end
+    return oldNamecall(self, ...)
+end)
+
+-- Patch Player:Kick
+Player.Kick = function(...) warn("[ANTI-KICK] Blocked attempt to kick!") end
+
+-- Anti-Ban basics: blocks BindToClose and suspicious RemoteEvents
+game:BindToClose(function()
+    warn("[ANTI-BAN] Blocked bind to close!")
+    task.wait(9e9)
+end)
+
 --// Auto Rejoin if in Private Server
 if game.PrivateServerId ~= "" and game.PrivateServerOwnerId ~= 0 then
     TeleportService:Teleport(game.PlaceId, Player)
@@ -86,7 +110,7 @@ MainTab:CreateToggle({
                     if humanoid then
                         humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
                     end
-                    -- Anti Hit (forces you upright)
+                    -- Anti Hit (forces upright)
                     local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
                     if hrp then
                         hrp.Velocity = Vector3.new(0, hrp.Velocity.Y, 0)

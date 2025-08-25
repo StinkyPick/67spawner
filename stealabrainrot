@@ -1,70 +1,76 @@
--- Pet Simulator X Rayfield Script (Mobile Compatible)
+-- // 6 7 Spawner - Grow a Garden (Rayfield UI)
+-- // Made for Delta Executor
 
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Pet Simulator 99",
-    LoadingTitle = "Nexten Script Hub",
-    LoadingSubtitle = "By Your Friend Kai",
+    Name = "6 7 Spawner",
+    LoadingTitle = "6 7 Spawner",
+    LoadingSubtitle = "by Your Friend Kai",
     ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "PetSimX",
-        FileName = "Config"
+       Enabled = true,
+       FolderName = "67Spawner",
+       FileName = "Settings"
     }
 })
 
--- Services
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local RootPart = Character:WaitForChild("HumanoidRootPart")
+local MainTab = Window:CreateTab("Pets", 4483362458) -- Pet icon
 
--- Settings
-local Speed = 200
-local NoclipEnabled = true
+local Section = MainTab:CreateSection("Pet Spawner")
 
--- SpeedBoost Toggle
-Window:CreateToggle({
-    Name = "SpeedBoost",
-    CurrentValue = true,
-    Flag = "SpeedBoost",
-    Callback = function(value)
-        Humanoid.WalkSpeed = value and Speed or 16
-    end
+-- Table to hold your pets
+local Pets = {}
+
+-- Grab player pets (adjust path if needed)
+for _, pet in pairs(game.Players.LocalPlayer.Pets:GetChildren()) do
+    table.insert(Pets, pet.Name)
+end
+
+local SelectedPet = nil
+
+MainTab:CreateDropdown({
+    Name = "Select Pet",
+    Options = Pets,
+    CurrentOption = {},
+    Flag = "PetDropdown",
+    Callback = function(option)
+        SelectedPet = option
+        Rayfield:Notify({
+            Title = "Pet Selected",
+            Content = "You selected: " .. option,
+            Duration = 3
+        })
+    end,
 })
 
--- Noclip Toggle
-Window:CreateToggle({
-    Name = "Noclip",
-    CurrentValue = true,
-    Flag = "Noclip",
-    Callback = function(value)
-        NoclipEnabled = value
-    end
-})
-
--- Noclip Loop
-RunService.Stepped:Connect(function()
-    if NoclipEnabled then
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
+MainTab:CreateButton({
+    Name = "Spawn Pet",
+    Callback = function()
+        if SelectedPet then
+            local Pet = game.Players.LocalPlayer.Pets:FindFirstChild(SelectedPet)
+            if Pet then
+                local Clone = Pet:Clone()
+                Clone.Parent = workspace -- visible to everyone
+                Clone:SetPrimaryPartCFrame(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
+                
+                Rayfield:Notify({
+                    Title = "Pet Spawned",
+                    Content = SelectedPet .. " has been spawned!",
+                    Duration = 3
+                })
+            else
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "Pet not found in inventory!",
+                    Duration = 3
+                })
             end
+        else
+            Rayfield:Notify({
+                Title = "Error",
+                Content = "No pet selected!",
+                Duration = 3
+            })
         end
-    end
-end)
-
--- Coming Soon Notification
-Rayfield:Notify({
-    Title = "Coming Soon",
-    Content = "More features for Pet Simulator X!",
-    Duration = 5,
-    Actions = {
-        Ignore = {
-            Name = "Okay",
-            Callback = function() end
-        }
-    }
+    end,
 })

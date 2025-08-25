@@ -2,13 +2,13 @@
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Pet Sim X",
+    Name = "Steal a Brainrot",
     LoadingTitle = "Nexten Script Hub",
-    LoadingSubtitle = "Auto Farm, Noclip, Auto Rebirth, Save Pet Egg & More yfk",
+    LoadingSubtitle = "Auto Money, Noclip, WalkSpeed, Infinite Jump, Anti-Hit & Anti-Ragdoll by yfk",
     ConfigurationSaving = {
         Enabled = true,
-        FolderName = "NextenScripts",
-        FileName = "PetSimXConfig"
+        FolderName = "NextenScriptHub",
+        FileName = "StealABrainrot"
     }
 })
 
@@ -17,147 +17,126 @@ local MainTab = Window:CreateTab("Main", 4483362458)
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local MiscTab = Window:CreateTab("Misc", 4483362458)
 
--- Optimized Auto Farm
-local autoFarmEnabled = false
+-- Variables
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local autoCollectEnabled = false
+local noclipEnabled = false
+local infiniteJumpEnabled = false
+local walkspeedValue = 50
+local antiHitEnabled = false
+
+-- Functions
+local function noclipLoop()
+    while noclipEnabled do
+        for _,part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+        game:GetService("RunService").Stepped:Wait()
+    end
+    for _,part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
+        end
+    end
+end
+
+-- Auto Collect Money
 MainTab:CreateToggle({
-    Name = "Auto Farm",
+    Name = "Auto Collect Money",
     CurrentValue = false,
-    Flag = "AutoFarmToggle",
+    Flag = "AutoCollectMoney",
     Callback = function(value)
-        autoFarmEnabled = value
-        if autoFarmEnabled then
-            spawn(function()
-                while autoFarmEnabled do
-                    local player = game.Players.LocalPlayer
-                    if player and player.Character and player.Character:FindFirstChild("Pets") then
-                        for _,pet in pairs(player.Character.Pets:GetChildren()) do
-                            if pet:FindFirstChild("HumanoidRootPart") then
-                                local closestCoin = nil
-                                local shortestDistance = math.huge
-                                for _,coin in pairs(workspace.Coins:GetChildren()) do
-                                    if coin:IsA("Part") then
-                                        local distance = (pet.HumanoidRootPart.Position - coin.Position).Magnitude
-                                        if distance < shortestDistance then
-                                            shortestDistance = distance
-                                            closestCoin = coin
-                                        end
-                                    end
-                                end
-                                if closestCoin then
-                                    pet.HumanoidRootPart.CFrame = CFrame.new(closestCoin.Position + Vector3.new(0,3,0))
-                                end
-                            end
+        autoCollectEnabled = value
+        spawn(function()
+            while autoCollectEnabled do
+                if workspace:FindFirstChild("Cash") then
+                    for _,cash in pairs(workspace.Cash:GetChildren()) do
+                        if cash:IsA("Part") then
+                            local originalCFrame = character.HumanoidRootPart.CFrame
+                            character.HumanoidRootPart.CFrame = cash.CFrame + Vector3.new(0,3,0)
+                            wait(0.05)
+                            character.HumanoidRootPart.CFrame = originalCFrame
                         end
                     end
-                    wait(0.05)
                 end
-            end)
-        end
+                wait(0.1)
+            end
+        end)
     end
 })
 
--- Save Pet Egg
-MainTab:CreateButton({
-    Name = "Save Pet Egg",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local egg = workspace:FindFirstChild("Egg") -- change if egg model has a different name
-        if egg and player and player.Character then
-            player.Character.HumanoidRootPart.CFrame = egg.CFrame + Vector3.new(0,5,0)
-            Rayfield:Notify({
-                Title = "Pet Sim X",
-                Content = "Teleported to Pet Egg!",
-                Duration = 3
-            })
-        else
-            Rayfield:Notify({
-                Title = "Pet Sim X",
-                Content = "No egg found!",
-                Duration = 3
-            })
-        end
-    end
-})
-
--- Speed
-local speedValue = 50
+-- WalkSpeed Slider
 PlayerTab:CreateSlider({
-    Name = "Walk Speed",
+    Name = "WalkSpeed",
     Range = {16, 250},
     Increment = 1,
     Suffix = "speed",
     CurrentValue = 50,
-    Flag = "SpeedSlider",
+    Flag = "WalkSpeedSlider",
     Callback = function(value)
-        speedValue = value
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speedValue
+        walkspeedValue = value
+        character.Humanoid.WalkSpeed = walkspeedValue
     end
 })
 
--- Fixed Noclip
-local noclipEnabled = false
+-- Noclip Toggle
 MiscTab:CreateToggle({
     Name = "Noclip",
     CurrentValue = false,
     Flag = "NoclipToggle",
     Callback = function(value)
         noclipEnabled = value
-        local player = game.Players.LocalPlayer
-        if player and player.Character then
-            local character = player.Character
-            spawn(function()
-                while noclipEnabled do
-                    for _, part in pairs(character:GetChildren()) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
-                        end
+        spawn(noclipLoop)
+    end
+})
+
+-- Infinite Jump
+MiscTab:CreateToggle({
+    Name = "Infinite Jump",
+    CurrentValue = false,
+    Flag = "InfiniteJumpToggle",
+    Callback = function(value)
+        infiniteJumpEnabled = value
+    end
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infiniteJumpEnabled then
+        character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- Anti-Hit / Anti-Ragdoll
+MiscTab:CreateToggle({
+    Name = "Anti Hit / Anti Ragdoll",
+    CurrentValue = false,
+    Flag = "AntiHitToggle",
+    Callback = function(value)
+        antiHitEnabled = value
+        if antiHitEnabled then
+            if character:FindFirstChild("Humanoid") then
+                character.Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+                    if character.Humanoid.Health < character.Humanoid.MaxHealth then
+                        character.Humanoid.Health = character.Humanoid.MaxHealth
                     end
-                    game:GetService("RunService").Stepped:Wait()
-                end
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = true
-                    end
+                end)
+            end
+            -- Anti ragdoll by resetting state if ragdoll occurs
+            character.Humanoid.StateChanged:Connect(function(_,newState)
+                if newState == Enum.HumanoidStateType.FallingDown or newState == Enum.HumanoidStateType.Ragdoll then
+                    character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
                 end
             end)
         end
     end
 })
 
--- Teleport to Egg Shop
-MainTab:CreateButton({
-    Name = "Teleport to Egg Shop",
-    Callback = function()
-        local shop = workspace:FindFirstChild("EggShop")
-        if shop then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = shop.CFrame + Vector3.new(0,5,0)
-        end
-    end
-})
-
--- Fixed Auto Rebirth
-local autoRebirth = false
-MainTab:CreateToggle({
-    Name = "Auto Rebirth",
-    CurrentValue = false,
-    Flag = "AutoRebirthToggle",
-    Callback = function(value)
-        autoRebirth = value
-        spawn(function()
-            while autoRebirth do
-                local rebirthBtn = workspace:FindFirstChild("RebirthButton") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("RebirthButton")
-                if rebirthBtn and rebirthBtn:IsA("ClickDetector") then
-                    fireclickdetector(rebirthBtn)
-                end
-                wait(0.5)
-            end
-        end)
-    end
-})
-
 Rayfield:Notify({
-    Title = "Pet Sim X Script",
-    Content = "Loaded successfully! Auto Farm, Save Pet Egg & Auto Rebirth working!",
+    Title = "Steal a Brainrot - Ultimate",
+    Content = "Loaded! Auto Money, Noclip, WalkSpeed, Infinite Jump, Anti-Hit & Anti-Ragdoll active!",
     Duration = 5,
     Image = 4483362458
 })

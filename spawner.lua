@@ -57,7 +57,7 @@ PetsTab:CreateButton({
     Name = "Spawn Pet",
     Callback = function()
         if SelectedPet then
-            -- Add pet to player's Pets folder (simulated inventory)
+            -- Add pet to player's Pets folder (inventory)
             local Pet = PetsFolder:FindFirstChild(SelectedPet)
             if not Pet then
                 Pet = Instance.new("Model")
@@ -65,20 +65,44 @@ PetsTab:CreateButton({
                 Pet.Parent = PetsFolder
             end
 
-            -- Spawn pet in workspace
+            -- Spawn pet in workspace so everyone can see
             local Clone = Instance.new("Model")
             Clone.Name = SelectedPet
             Clone.Parent = workspace
 
+            -- Create a simple PrimaryPart so it can be positioned
+            local Part = Instance.new("Part")
+            Part.Size = Vector3.new(2,2,2)
+            Part.Anchored = true
+            Part.Name = "HumanoidRootPart"
+            Part.Parent = Clone
+            Clone.PrimaryPart = Part
+
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                Clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
+                local hrp = player.Character.HumanoidRootPart
+                Clone:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(3,0,0))
             end
+
+            -- Optional: Add floating NameLabel above the pet
+            local Billboard = Instance.new("BillboardGui")
+            Billboard.Size = UDim2.new(0,100,0,50)
+            Billboard.StudsOffset = Vector3.new(0,3,0)
+            Billboard.Adornee = Part
+            Billboard.Parent = Clone
+
+            local Label = Instance.new("TextLabel")
+            Label.Size = UDim2.new(1,0,1,0)
+            Label.BackgroundTransparency = 1
+            Label.Text = SelectedPet
+            Label.TextColor3 = Color3.fromRGB(255,255,255)
+            Label.TextScaled = true
+            Label.Parent = Billboard
 
             -- Reset selection
             SelectedPet = nil
             PetDropdown:SetValue(nil)
 
-            Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." has spawned!", Duration=3})
+            Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." spawned for everyone to see!", Duration=3})
         else
             Rayfield:Notify({Title="Error", Content="No pet selected!", Duration=3})
         end

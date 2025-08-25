@@ -44,31 +44,36 @@ local SelectedPet = nil
 local MainTab = Window:CreateTab("Pets", 4483362458)
 local Section = MainTab:CreateSection("Pet Spawner")
 
-MainTab:CreateDropdown({
+-- Dropdown for selecting pet
+local PetDropdown = MainTab:CreateDropdown({
     Name = "Select Pet",
     Options = Pets,
-    CurrentOption = {},
+    CurrentOption = nil,
     Flag = "PetDropdown",
     Callback = function(option)
         SelectedPet = option
-        Rayfield:Notify({Title="Pet Selected", Content="You selected: "..option, Duration=3})
+        Rayfield:Notify({
+            Title="Pet Selected",
+            Content="You selected: "..option,
+            Duration=3
+        })
     end
 })
 
+-- Button to spawn pet
 MainTab:CreateButton({
     Name = "Spawn Pet",
     Callback = function()
         if SelectedPet then
-            -- Check if the player already has a copy in their inventory
+            -- Check if player already has the pet in inventory
             local Pet = PetsFolder:FindFirstChild(SelectedPet)
             if not Pet then
-                -- Simulate adding pet to inventory
                 Pet = Instance.new("Model")
                 Pet.Name = SelectedPet
                 Pet.Parent = PetsFolder
             end
 
-            -- Clone the pet and spawn it in the workspace (visible to everyone)
+            -- Spawn clone in workspace
             local Clone = Instance.new("Model")
             Clone.Name = SelectedPet
             Clone.Parent = workspace
@@ -76,9 +81,21 @@ MainTab:CreateButton({
                 Clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
             end
 
-            Rayfield:Notify({Title="Pet Spawned", Content=SelectedPet.." spawned in workspace!", Duration=3})
+            -- Reset selection so only one pet is chosen per spawn
+            SelectedPet = nil
+            PetDropdown:SetValue(nil) -- resets dropdown
+
+            Rayfield:Notify({
+                Title="Pet Spawned",
+                Content=Clone.Name.." spawned in workspace!",
+                Duration=3
+            })
         else
-            Rayfield:Notify({Title="Error", Content="No pet selected!", Duration=3})
+            Rayfield:Notify({
+                Title="Error",
+                Content="No pet selected!",
+                Duration=3
+            })
         end
     end
 })

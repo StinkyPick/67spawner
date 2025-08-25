@@ -1,5 +1,4 @@
--- Steal a Brainrot Mobile Key System + Script (Delta Executor)
-
+-- Steal a Brainrot Mobile Key System + Script
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -9,18 +8,18 @@ local RootPart = Character:WaitForChild("HumanoidRootPart")
 
 -- ===== KEY SYSTEM =====
 local correctKey = "food"
-local input = LocalPlayer:PromptInput("Enter Key:", "")
+local success, input = pcall(function()
+    return LocalPlayer:PromptInput("Enter Key:", "")
+end)
 
-if input ~= correctKey then
+if not success or input ~= correctKey then
     print("Wrong key! Script stopped.")
-    return -- stop script
+    return
 end
 
 print("Key correct! Access granted.")
 
--- ===== MAIN SCRIPT =====
-
--- Settings
+-- ===== SETTINGS =====
 local Speed = 100
 local JumpPower = 150
 local AutoSteal = true
@@ -28,30 +27,20 @@ local Noclip = true
 local TeleportDistance = 20
 local BasePosition = RootPart.Position
 
--- Apply Speed and JumpPower
+-- Apply speed/jump
 Humanoid.WalkSpeed = Speed
 Humanoid.JumpPower = JumpPower
 
--- ===== MOBILE INPUT FUNCTIONS =====
--- Use PromptInput for actions instead of keyboard
-
-local function TeleportForward()
-    RootPart.CFrame = RootPart.CFrame + RootPart.CFrame.LookVector * TeleportDistance
-end
-
-local function TeleportBackward()
-    RootPart.CFrame = RootPart.CFrame - RootPart.CFrame.LookVector * TeleportDistance
-end
-
-local function SaveBase()
-    BasePosition = RootPart.Position
-    print("Base saved!")
-end
-
-local function TeleportToBase()
-    RootPart.CFrame = CFrame.new(BasePosition)
-    print("Teleported to base!")
-end
+-- ===== NOCOLIP =====
+RunService.Stepped:Connect(function()
+    if Noclip then
+        for _, part in pairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
 
 -- ===== AUTO STEAL =====
 RunService.RenderStepped:Connect(function()
@@ -63,29 +52,35 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ===== NOCIP =====
-RunService.Stepped:Connect(function()
-    if Noclip then
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    end
-end)
+-- ===== MOBILE ACTIONS =====
+-- Instead of keyboard, we use repeated PromptInput for actions
+local function MobileActionPrompt()
+    local actionSuccess, action = pcall(function()
+        return LocalPlayer:PromptInput("Type action: forward/backward/savebase/tobase", "")
+    end)
+    if not actionSuccess or not action then return end
 
--- ===== MOBILE BUTTON MENU =====
-while true do
-    local action = LocalPlayer:PromptInput("Enter Action: forward/backward/savebase/tobase", "")
     if action == "forward" then
-        TeleportForward()
+        RootPart.CFrame = RootPart.CFrame + RootPart.CFrame.LookVector * TeleportDistance
     elseif action == "backward" then
-        TeleportBackward()
+        RootPart.CFrame = RootPart.CFrame - RootPart.CFrame.LookVector * TeleportDistance
     elseif action == "savebase" then
-        SaveBase()
+        BasePosition = RootPart.Position
+        print("Base saved!")
     elseif action == "tobase" then
-        TeleportToBase()
+        RootPart.CFrame = CFrame.new(BasePosition)
+        print("Teleported to base!")
     else
         print("Invalid action!")
     end
 end
+
+-- Call mobile prompt every few seconds without freezing
+spawn(function()
+    while true do
+        MobileActionPrompt()
+        wait(2) -- small delay to prevent freezing
+    end
+end)
+
+print("Steal a Brainrot Mobile Script loaded!")

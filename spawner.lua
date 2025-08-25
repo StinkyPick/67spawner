@@ -1,5 +1,5 @@
 -- // 6 7 Spawner - Grow a Garden (Rayfield UI)
--- // Made for Roblox Studio (simulating Grow a Garden Pets)
+-- // Made for Roblox Studio (simulate Grow a Garden Pets)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -16,7 +16,7 @@ local Window = Rayfield:CreateWindow({
 
 local player = game.Players.LocalPlayer
 
--- Create a simulated "Pets" folder for the player
+-- Ensure a "Pets" folder exists in the player
 if not player:FindFirstChild("Pets") then
     local Inventory = Instance.new("Folder")
     Inventory.Name = "Pets"
@@ -25,7 +25,7 @@ end
 
 local PetsFolder = player:FindFirstChild("Pets")
 
--- Predefined Grow a Garden pets list
+-- List of Grow a Garden pets
 local Pets = {
     "Bunny","Dog","Golden Lab","Dairy Cow","Starfish","Crab","Seagull","Black Bunny",
     "Cat","Chicken","Deer","Bee","Bacon Pig","Jackalope","Monkey","Red Fox","Dragonfly",
@@ -39,6 +39,8 @@ local Pets = {
 }
 
 local SelectedPet = nil
+local PetAge = ""
+local PetWeight = ""
 
 -- Spawner UI
 local MainTab = Window:CreateTab("Pets", 4483362458)
@@ -52,11 +54,37 @@ local PetDropdown = MainTab:CreateDropdown({
     Flag = "PetDropdown",
     Callback = function(option)
         SelectedPet = option
-        Rayfield:Notify({
-            Title="Pet Selected",
-            Content="You selected: "..option,
-            Duration=3
-        })
+        Rayfield:Notify({Title="Pet Selected", Content="You selected: "..option, Duration=3})
+    end
+})
+
+-- Textbox for Age
+MainTab:CreateTextbox({
+    Name = "Age (1-100)",
+    PlaceholderText = "Enter Age",
+    Callback = function(text)
+        local num = tonumber(text)
+        if num and num >= 1 and num <= 100 then
+            PetAge = num
+        else
+            Rayfield:Notify({Title="Error", Content="Age must be between 1 and 100", Duration=3})
+            PetAge = ""
+        end
+    end
+})
+
+-- Textbox for Weight
+MainTab:CreateTextbox({
+    Name = "Weight",
+    PlaceholderText = "Enter Weight",
+    Callback = function(text)
+        local num = tonumber(text)
+        if num and num > 0 then
+            PetWeight = num
+        else
+            Rayfield:Notify({Title="Error", Content="Weight must be a number greater than 0", Duration=3})
+            PetWeight = ""
+        end
     end
 })
 
@@ -64,38 +92,38 @@ local PetDropdown = MainTab:CreateDropdown({
 MainTab:CreateButton({
     Name = "Spawn Pet",
     Callback = function()
-        if SelectedPet then
-            -- Check if player already has the pet in inventory
+        if SelectedPet and PetAge ~= "" and PetWeight ~= "" then
+            -- Add to inventory
             local Pet = PetsFolder:FindFirstChild(SelectedPet)
             if not Pet then
                 Pet = Instance.new("Model")
                 Pet.Name = SelectedPet
                 Pet.Parent = PetsFolder
             end
+            Pet:SetAttribute("Age", PetAge)
+            Pet:SetAttribute("Weight", PetWeight)
 
             -- Spawn clone in workspace
             local Clone = Instance.new("Model")
             Clone.Name = SelectedPet
             Clone.Parent = workspace
+            Clone:SetAttribute("Age", PetAge)
+            Clone:SetAttribute("Weight", PetWeight)
+
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                Clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
+                local hrp = player.Character.HumanoidRootPart
+                Clone:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(3,0,0))
             end
 
-            -- Reset selection so only one pet is chosen per spawn
+            -- Reset selections
             SelectedPet = nil
-            PetDropdown:SetValue(nil) -- resets dropdown
+            PetDropdown:SetValue(nil)
+            PetAge = ""
+            PetWeight = ""
 
-            Rayfield:Notify({
-                Title="Pet Spawned",
-                Content=Clone.Name.." spawned in workspace!",
-                Duration=3
-            })
+            Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." spawned with Age "..Clone:GetAttribute("Age").." and Weight "..Clone:GetAttribute("Weight").."!", Duration=3})
         else
-            Rayfield:Notify({
-                Title="Error",
-                Content="No pet selected!",
-                Duration=3
-            })
+            Rayfield:Notify({Title="Error", Content="Select a pet and enter valid Age and Weight!", Duration=3})
         end
     end
 })

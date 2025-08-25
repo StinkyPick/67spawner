@@ -8,9 +8,7 @@ local Window = Rayfield:CreateWindow({
     LoadingTitle = "6 7 Spawner",
     LoadingSubtitle = "by Your Friend Kai",
     ConfigurationSaving = {
-       Enabled = true,
-       FolderName = "67Spawner",
-       FileName = "Settings"
+       Enabled = false, -- Disable saving so selections are not remembered
     }
 })
 
@@ -54,7 +52,6 @@ local PetDropdown = MainTab:CreateDropdown({
     Flag = "PetDropdown",
     Callback = function(option)
         SelectedPet = option
-        Rayfield:Notify({Title="Pet Selected", Content="You selected: "..option, Duration=3})
     end
 })
 
@@ -93,37 +90,46 @@ MainTab:CreateButton({
     Name = "Spawn Pet",
     Callback = function()
         if SelectedPet and PetAge ~= "" and PetWeight ~= "" then
-            -- Add to inventory
-            local Pet = PetsFolder:FindFirstChild(SelectedPet)
-            if not Pet then
-                Pet = Instance.new("Model")
-                Pet.Name = SelectedPet
-                Pet.Parent = PetsFolder
-            end
-            Pet:SetAttribute("Age", PetAge)
-            Pet:SetAttribute("Weight", PetWeight)
-
-            -- Spawn clone in workspace
+            -- Create pet model in workspace
             local Clone = Instance.new("Model")
             Clone.Name = SelectedPet
             Clone.Parent = workspace
+
+            -- Add Age and Weight as attributes
             Clone:SetAttribute("Age", PetAge)
             Clone:SetAttribute("Weight", PetWeight)
 
+            -- Add to player's inventory for display purposes (optional)
+            local InventoryPet = PetsFolder:FindFirstChild(SelectedPet)
+            if not InventoryPet then
+                InventoryPet = Instance.new("Model")
+                InventoryPet.Name = SelectedPet
+                InventoryPet.Parent = PetsFolder
+            end
+            InventoryPet:SetAttribute("Age", PetAge)
+            InventoryPet:SetAttribute("Weight", PetWeight)
+
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = player.Character.HumanoidRootPart
-                Clone:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(3,0,0))
+                Clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
             end
 
-            -- Reset selections
+            -- Reset selection so they must pick a new pet
             SelectedPet = nil
             PetDropdown:SetValue(nil)
             PetAge = ""
             PetWeight = ""
 
-            Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." spawned with Age "..Clone:GetAttribute("Age").." and Weight "..Clone:GetAttribute("Weight").."!", Duration=3})
+            Rayfield:Notify({
+                Title="Pet Spawned",
+                Content=Clone.Name.." spawned with Age "..Clone:GetAttribute("Age").." and Weight "..Clone:GetAttribute("Weight").."!",
+                Duration=3
+            })
         else
-            Rayfield:Notify({Title="Error", Content="Select a pet and enter valid Age and Weight!", Duration=3})
+            Rayfield:Notify({
+                Title="Error",
+                Content="Select a pet and enter valid Age and Weight!",
+                Duration=3
+            })
         end
     end
 })

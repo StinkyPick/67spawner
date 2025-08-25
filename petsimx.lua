@@ -4,7 +4,7 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
     Name = "Pet Sim X",
     LoadingTitle = "Nexten Script Hub",
-    LoadingSubtitle = "Auto Farm, Speed, Noclip & More by yfk",
+    LoadingSubtitle = "Auto Farm, Noclip, Auto Rebirth, Save Pet Egg & More yfk",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "NextenScripts",
@@ -17,7 +17,7 @@ local MainTab = Window:CreateTab("Main", 4483362458)
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local MiscTab = Window:CreateTab("Misc", 4483362458)
 
--- Auto Farm
+-- Optimized Auto Farm
 local autoFarmEnabled = false
 MainTab:CreateToggle({
     Name = "Auto Farm",
@@ -28,7 +28,6 @@ MainTab:CreateToggle({
         if autoFarmEnabled then
             spawn(function()
                 while autoFarmEnabled do
-                    -- Make all pets target nearest coin
                     local player = game.Players.LocalPlayer
                     if player and player.Character and player.Character:FindFirstChild("Pets") then
                         for _,pet in pairs(player.Character.Pets:GetChildren()) do
@@ -45,14 +44,37 @@ MainTab:CreateToggle({
                                     end
                                 end
                                 if closestCoin then
-                                    pet.HumanoidRootPart.CFrame = CFrame.new(closestCoin.Position)
+                                    pet.HumanoidRootPart.CFrame = CFrame.new(closestCoin.Position + Vector3.new(0,3,0))
                                 end
                             end
                         end
                     end
-                    wait(0.1) -- faster collection
+                    wait(0.05)
                 end
             end)
+        end
+    end
+})
+
+-- Save Pet Egg
+MainTab:CreateButton({
+    Name = "Save Pet Egg",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local egg = workspace:FindFirstChild("Egg") -- change if egg model has a different name
+        if egg and player and player.Character then
+            player.Character.HumanoidRootPart.CFrame = egg.CFrame + Vector3.new(0,5,0)
+            Rayfield:Notify({
+                Title = "Pet Sim X",
+                Content = "Teleported to Pet Egg!",
+                Duration = 3
+            })
+        else
+            Rayfield:Notify({
+                Title = "Pet Sim X",
+                Content = "No egg found!",
+                Duration = 3
+            })
         end
     end
 })
@@ -72,7 +94,7 @@ PlayerTab:CreateSlider({
     end
 })
 
--- Noclip
+-- Fixed Noclip
 local noclipEnabled = false
 MiscTab:CreateToggle({
     Name = "Noclip",
@@ -80,13 +102,24 @@ MiscTab:CreateToggle({
     Flag = "NoclipToggle",
     Callback = function(value)
         noclipEnabled = value
-        local character = game.Players.LocalPlayer.Character
-        if character then
-            for _,part in pairs(character:GetChildren()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = not noclipEnabled and true or false
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local character = player.Character
+            spawn(function()
+                while noclipEnabled do
+                    for _, part in pairs(character:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                    game:GetService("RunService").Stepped:Wait()
                 end
-            end
+                for _, part in pairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end)
         end
     end
 })
@@ -102,7 +135,7 @@ MainTab:CreateButton({
     end
 })
 
--- Auto Rebirth
+-- Fixed Auto Rebirth
 local autoRebirth = false
 MainTab:CreateToggle({
     Name = "Auto Rebirth",
@@ -112,10 +145,11 @@ MainTab:CreateToggle({
         autoRebirth = value
         spawn(function()
             while autoRebirth do
-                if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("RebirthButton") then
-                    fireclickdetector(game:GetService("Players").LocalPlayer.PlayerGui.RebirthButton)
+                local rebirthBtn = workspace:FindFirstChild("RebirthButton") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("RebirthButton")
+                if rebirthBtn and rebirthBtn:IsA("ClickDetector") then
+                    fireclickdetector(rebirthBtn)
                 end
-                wait(1)
+                wait(0.5)
             end
         end)
     end
@@ -123,7 +157,7 @@ MainTab:CreateToggle({
 
 Rayfield:Notify({
     Title = "Pet Sim X Script",
-    Content = "Loaded successfully! Auto Farm, Speed, Noclip & More!",
+    Content = "Loaded successfully! Auto Farm, Save Pet Egg & Auto Rebirth working!",
     Duration = 5,
     Image = 4483362458
 })

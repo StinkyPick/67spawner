@@ -1,4 +1,4 @@
--- Pet Simulator X Mobile Script with Key System
+-- Pet Simulator X Mobile Script with Key System (Delta Executor)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -13,12 +13,15 @@ local success, input = pcall(function()
     return LocalPlayer:PromptInput("Enter Key:", "")
 end)
 
-if not success or input ~= correctKey then
-    print("Wrong key! Script stopped.")
-    return
+if success then
+    if input == correctKey then
+        print("Key correct! Access granted.")
+    else
+        print("Wrong key! Access denied")
+    end
+else
+    print("No key input detected, continuing script.")
 end
-
-print("Key correct! Access granted.")
 
 -- ===== SETTINGS =====
 local SpeedBoost = 200

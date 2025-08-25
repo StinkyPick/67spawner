@@ -1,4 +1,5 @@
--- Steal a Brainrot Mobile Key System + Script
+-- Pet Simulator X Mobile Script with Key System
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -20,20 +21,16 @@ end
 print("Key correct! Access granted.")
 
 -- ===== SETTINGS =====
-local Speed = 100
-local JumpPower = 150
-local AutoSteal = true
-local Noclip = true
-local TeleportDistance = 20
-local BasePosition = RootPart.Position
+local SpeedBoost = 200
+local NoclipEnabled = true
 
--- Apply speed/jump
-Humanoid.WalkSpeed = Speed
-Humanoid.JumpPower = JumpPower
+-- Apply SpeedBoost
+Humanoid.WalkSpeed = SpeedBoost
+print("SpeedBoost applied!")
 
--- ===== NOCOLIP =====
+-- Noclip Loop
 RunService.Stepped:Connect(function()
-    if Noclip then
+    if NoclipEnabled then
         for _, part in pairs(Character:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
@@ -41,46 +38,7 @@ RunService.Stepped:Connect(function()
         end
     end
 end)
+print("Noclip enabled!")
 
--- ===== AUTO STEAL =====
-RunService.RenderStepped:Connect(function()
-    if AutoSteal then
-        local tool = Character:FindFirstChildWhichIsA("Tool")
-        if tool and tool.Name == "Brainrot" then
-            RootPart.CFrame = CFrame.new(BasePosition)
-        end
-    end
-end)
-
--- ===== MOBILE ACTIONS =====
--- Instead of keyboard, we use repeated PromptInput for actions
-local function MobileActionPrompt()
-    local actionSuccess, action = pcall(function()
-        return LocalPlayer:PromptInput("Type action: forward/backward/savebase/tobase", "")
-    end)
-    if not actionSuccess or not action then return end
-
-    if action == "forward" then
-        RootPart.CFrame = RootPart.CFrame + RootPart.CFrame.LookVector * TeleportDistance
-    elseif action == "backward" then
-        RootPart.CFrame = RootPart.CFrame - RootPart.CFrame.LookVector * TeleportDistance
-    elseif action == "savebase" then
-        BasePosition = RootPart.Position
-        print("Base saved!")
-    elseif action == "tobase" then
-        RootPart.CFrame = CFrame.new(BasePosition)
-        print("Teleported to base!")
-    else
-        print("Invalid action!")
-    end
-end
-
--- Call mobile prompt every few seconds without freezing
-spawn(function()
-    while true do
-        MobileActionPrompt()
-        wait(2) -- small delay to prevent freezing
-    end
-end)
-
-print("Steal a Brainrot Mobile Script loaded!")
+-- Coming Soon message
+print("Coming Soon: More features for Pet Simulator X!")

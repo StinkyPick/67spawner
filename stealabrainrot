@@ -1,92 +1,45 @@
--- Steal a Brainrot Rayfield Script (Mobile & Delta Executor Compatible)
+-- Steal a Brainrot Key System + Script (Delta Executor, No Rayfield)
 
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+-- Correct key
+local correctKey = "food"
 
-local Window = Rayfield:CreateWindow({
-    Name = "Steal a Brainrot | Mobile",
-    LoadingTitle = "Loading Script",
-    LoadingSubtitle = "By Nexten",
-    ConfigurationSaving = {
-       Enabled = true,
-       FolderName = "StealABrainrot", 
-       FileName = "Config"
-    }
-})
+-- Ask user for the key
+local input = game:GetService("Players").LocalPlayer:PromptInput("Enter Key:", "")
 
--- Services
+if input ~= correctKey then
+    print("Wrong key! Script stopped.")
+    return -- stop the script
+end
+
+print("Key correct! Access granted.")
+
+-- ===== START OF MAIN SCRIPT =====
+-- Example Steal a Brainrot features without Rayfield
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- Default Settings
+-- Settings
 local Speed = 100
 local JumpPower = 150
 local TeleportDistance = 20
 local BasePosition = RootPart.Position
+local AutoSteal = true
+local Noclip = true
 
--- Features
-local SpeedToggle = Window:CreateToggle({
-    Name = "Speed Boost",
-    CurrentValue = true,
-    Flag = "SpeedToggle",
-    Callback = function(value)
-        Humanoid.WalkSpeed = value and Speed or 16
-    end
-})
-
-local JumpToggle = Window:CreateToggle({
-    Name = "Jump Boost",
-    CurrentValue = true,
-    Flag = "JumpToggle",
-    Callback = function(value)
-        Humanoid.JumpPower = value and JumpPower or 50
-    end
-})
-
-local AutoStealToggle = Window:CreateToggle({
-    Name = "Auto Steal",
-    CurrentValue = true,
-    Flag = "AutoSteal",
-})
-
-local NoclipToggle = Window:CreateToggle({
-    Name = "Noclip",
-    CurrentValue = true,
-    Flag = "Noclip",
-})
-
--- Buttons
-Window:CreateButton({
-    Name = "Save Base Here",
-    Callback = function()
-        BasePosition = RootPart.Position
-        Rayfield:Notify({
-            Title = "Base Saved",
-            Content = "Current position saved as base.",
-            Duration = 3
-        })
-    end
-})
-
-Window:CreateButton({
-    Name = "Teleport to Base",
-    Callback = function()
-        RootPart.CFrame = CFrame.new(BasePosition)
-        Rayfield:Notify({
-            Title = "Teleported",
-            Content = "You are now at your base.",
-            Duration = 3
-        })
-    end
-})
+-- Apply Speed / Jump
+Humanoid.WalkSpeed = Speed
+Humanoid.JumpPower = JumpPower
 
 -- Noclip Loop
 RunService.Stepped:Connect(function()
-    if NoclipToggle.CurrentValue then
+    if Noclip then
         for _, part in pairs(Character:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
@@ -97,7 +50,7 @@ end)
 
 -- Auto Steal
 RunService.RenderStepped:Connect(function()
-    if AutoStealToggle.CurrentValue then
+    if AutoSteal then
         local tool = Character:FindFirstChildWhichIsA("Tool")
         if tool and tool.Name == "Brainrot" then
             RootPart.CFrame = CFrame.new(BasePosition)
@@ -111,11 +64,10 @@ UserInputService.InputBegan:Connect(function(input)
         RootPart.CFrame = RootPart.CFrame + RootPart.CFrame.LookVector * TeleportDistance
     elseif input.KeyCode == Enum.KeyCode.Q then
         RootPart.CFrame = RootPart.CFrame - RootPart.CFrame.LookVector * TeleportDistance
+    elseif input.KeyCode == Enum.KeyCode.B then
+        BasePosition = RootPart.Position
+        print("Base saved!")
     end
 end)
 
-Rayfield:Notify({
-    Title = "Loaded",
-    Content = "Steal a Brainrot Script Loaded Successfully",
-    Duration = 5
-})
+print("Steal a Brainrot script loaded successfully!")

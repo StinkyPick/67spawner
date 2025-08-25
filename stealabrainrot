@@ -18,12 +18,14 @@ local MainTab = Window:CreateTab("Pets", 4483362458) -- Pet icon
 
 local Section = MainTab:CreateSection("Pet Spawner")
 
--- Table to hold your pets
+-- Grab pets from your inventory (adjust if path is different in Grow a Garden)
 local Pets = {}
+local player = game.Players.LocalPlayer
 
--- Grab player pets (adjust path if needed)
-for _, pet in pairs(game.Players.LocalPlayer.Pets:GetChildren()) do
-    table.insert(Pets, pet.Name)
+if player:FindFirstChild("Pets") then
+    for _, pet in pairs(player.Pets:GetChildren()) do
+        table.insert(Pets, pet.Name)
+    end
 end
 
 local SelectedPet = nil
@@ -47,23 +49,26 @@ MainTab:CreateButton({
     Name = "Spawn Pet",
     Callback = function()
         if SelectedPet then
-            local Pet = game.Players.LocalPlayer.Pets:FindFirstChild(SelectedPet)
-            if Pet then
-                local Clone = Pet:Clone()
-                Clone.Parent = workspace -- visible to everyone
-                Clone:SetPrimaryPartCFrame(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
-                
-                Rayfield:Notify({
-                    Title = "Pet Spawned",
-                    Content = SelectedPet .. " has been spawned!",
-                    Duration = 3
-                })
-            else
-                Rayfield:Notify({
-                    Title = "Error",
-                    Content = "Pet not found in inventory!",
-                    Duration = 3
-                })
+            local petFolder = player:FindFirstChild("Pets")
+            if petFolder then
+                local Pet = petFolder:FindFirstChild(SelectedPet)
+                if Pet then
+                    local Clone = Pet:Clone()
+                    Clone.Parent = workspace -- visible to everyone locally
+                    Clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
+
+                    Rayfield:Notify({
+                        Title = "Pet Spawned",
+                        Content = SelectedPet .. " has been spawned!",
+                        Duration = 3
+                    })
+                else
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = "Pet not found in inventory!",
+                        Duration = 3
+                    })
+                end
             end
         else
             Rayfield:Notify({
@@ -74,3 +79,6 @@ MainTab:CreateButton({
         end
     end,
 })
+
+-- this makes the UI appear
+Rayfield:LoadConfiguration()

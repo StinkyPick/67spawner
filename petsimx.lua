@@ -1,166 +1,153 @@
---// Load Rayfield
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- Load Rayfield UI
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Steal a Brainrot Hub",
    LoadingTitle = "Loading...",
    LoadingSubtitle = "by yfk",
    ConfigurationSaving = {
-      Enabled = true,
-      FolderName = "BrainrotHub",
-      FileName = "MainConfig"
-   },
-   Discord = {
-      Enabled = false,
-   },
-   KeySystem = false
+      Enabled = false
+   }
 })
 
---// Tabs
 local MainTab = Window:CreateTab("Main", 4483362458)
-local PlayerTab = Window:CreateTab("Player", 4483362458)
-local BaseTab = Window:CreateTab("Base", 4483362458)
+local Player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
 
---// Variables
-local savedBaseCFrame = nil
+--// AUTO REJOIN IF PRIVATE SERVER
+local TeleportService = game:GetService("TeleportService")
+if game.PrivateServerId ~= "" and game.PrivateServerOwnerId ~= 0 then
+    task.wait(1)
+    TeleportService:Teleport(game.PlaceId, Player)
+end
+
+--// Noclip
 local noclipEnabled = false
-local infJumpEnabled = false
-local antiHitEnabled = false
-local antiRagdollEnabled = false
-
-----------------------------------------------------
--- AUTO COLLECT MONEY
-----------------------------------------------------
-MainTab:CreateButton({
-    Name = "Auto Collect Money",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local char = player.Character
-        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-
-        local root = char.HumanoidRootPart
-        local oldCFrame = root.CFrame
-
-        for _,v in pairs(workspace:GetDescendants()) do
-            if v:IsA("Part") and v.Name == "Money" then
-                root.CFrame = v.CFrame
-                wait(0.1)
-            end
-        end
-
-        -- teleport back
-        root.CFrame = oldCFrame
-        Rayfield:Notify({
-            Title = "Auto Collect",
-            Content = "Collected all nearby Brainrot cash!",
-            Duration = 3
-        })
-    end
-})
-
-----------------------------------------------------
--- NOCLIP
-----------------------------------------------------
-PlayerTab:CreateToggle({
-    Name = "Noclip",
-    CurrentValue = false,
-    Callback = function(state)
-        noclipEnabled = state
-    end
-})
-
 game:GetService("RunService").Stepped:Connect(function()
-    if noclipEnabled then
-        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
+    if noclipEnabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        for _, part in pairs(Player.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
                 part.CanCollide = false
             end
         end
     end
 end)
 
-----------------------------------------------------
--- WALKSPEED
-----------------------------------------------------
-PlayerTab:CreateSlider({
-    Name = "WalkSpeed",
-    Range = {16, 200},
-    Increment = 1,
-    Suffix = "Speed",
-    CurrentValue = 16,
-    Callback = function(val)
-        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = val
-    end,
-})
-
-----------------------------------------------------
--- INFINITE JUMP
-----------------------------------------------------
-PlayerTab:CreateToggle({
-    Name = "Infinite Jump",
+MainTab:CreateToggle({
+    Name = "Noclip",
     CurrentValue = false,
-    Callback = function(state)
-        infJumpEnabled = state
+    Callback = function(v)
+        noclipEnabled = v
     end
 })
 
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if infJumpEnabled then
-        local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum:ChangeState("Jumping")
+--// Walkspeed
+MainTab:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 100},
+    Increment = 1,
+    CurrentValue = 16,
+    Callback = function(value)
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = value
         end
+    end
+})
+
+--// Infinite Jump
+local infJump = false
+UIS.JumpRequest:Connect(function()
+    if infJump and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        Player.Character.Humanoid:ChangeState("Jumping")
     end
 end)
 
-----------------------------------------------------
--- ANTI-HIT
-----------------------------------------------------
-PlayerTab:CreateToggle({
-    Name = "Anti Hit",
+MainTab:CreateToggle({
+    Name = "Infinite Jump",
     CurrentValue = false,
-    Callback = function(state)
-        antiHitEnabled = state
-        local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then
-            if state then
-                hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-                hum.Health = hum.MaxHealth
-            else
-                hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+    Callback = function(v)
+        infJump = v
+    end
+})
+
+--// Anti-Hit (No damage)
+local antiHit = false
+Player.CharacterAdded:Connect(function(char)
+    if antiHit then
+        local hum = char:WaitForChild("Humanoid")
+        hum.HealthChanged:Connect(function()
+            hum.Health = hum.MaxHealth
+        end)
+    end
+end)
+
+MainTab:CreateToggle({
+    Name = "Anti-Hit",
+    CurrentValue = false,
+    Callback = function(v)
+        antiHit = v
+        if v and Player.Character then
+            local hum = Player.Character:FindFirstChild("Humanoid")
+            if hum then
+                hum.HealthChanged:Connect(function()
+                    hum.Health = hum.MaxHealth
+                end)
             end
         end
     end
 })
 
-----------------------------------------------------
--- ANTI-RAGDOLL
-----------------------------------------------------
-PlayerTab:CreateToggle({
-    Name = "Anti Ragdoll",
+--// Anti-Ragdoll
+local antiRagdoll = false
+MainTab:CreateToggle({
+    Name = "Anti-Ragdoll",
     CurrentValue = false,
-    Callback = function(state)
-        antiRagdollEnabled = state
-        local char = game.Players.LocalPlayer.Character
-        if char then
-            for _,v in pairs(char:GetDescendants()) do
+    Callback = function(v)
+        antiRagdoll = v
+        if v and Player.Character then
+            for _, v in pairs(Player.Character:GetDescendants()) do
                 if v:IsA("BallSocketConstraint") then
-                    v.Enabled = not state
+                    v:Destroy()
                 end
             end
         end
     end
 })
 
-----------------------------------------------------
--- BASE SYSTEM
-----------------------------------------------------
-BaseTab:CreateButton({
+--// Auto Collect Money
+local autoCollect = false
+local oldCFrame
+MainTab:CreateToggle({
+    Name = "Auto Collect Money",
+    CurrentValue = false,
+    Callback = function(v)
+        autoCollect = v
+        task.spawn(function()
+            while autoCollect do
+                task.wait(1)
+                if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = Player.Character.HumanoidRootPart
+                    oldCFrame = hrp.CFrame
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if obj:IsA("TouchTransmitter") and obj.Parent and obj.Parent:IsA("BasePart") then
+                            hrp.CFrame = obj.Parent.CFrame
+                            task.wait(0.1)
+                        end
+                    end
+                    hrp.CFrame = oldCFrame
+                end
+            end
+        end)
+    end
+})
+
+--// Save Base / Go To Base
+local savedBaseCFrame = nil
+MainTab:CreateButton({
     Name = "Save Base Spot",
     Callback = function()
-        local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            savedBaseCFrame = player.Character.HumanoidRootPart.CFrame
+        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            savedBaseCFrame = Player.Character.HumanoidRootPart.CFrame
             Rayfield:Notify({
                 Title = "Base Saved",
                 Content = "Your base spot has been saved!",
@@ -170,15 +157,14 @@ BaseTab:CreateButton({
     end
 })
 
-BaseTab:CreateButton({
+MainTab:CreateButton({
     Name = "Go To Base",
     Callback = function()
-        local player = game.Players.LocalPlayer
-        if savedBaseCFrame and player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            player.Character.HumanoidRootPart.CFrame = savedBaseCFrame
+        if savedBaseCFrame and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = savedBaseCFrame
             Rayfield:Notify({
                 Title = "Teleported",
-                Content = "You have been teleported to your base spot!",
+                Content = "You have been teleported to your base!",
                 Duration = 3
             })
         else

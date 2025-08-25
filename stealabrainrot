@@ -1,5 +1,19 @@
--- Pet Simulator X Mobile Script with Key System (Delta Executor)
+-- Pet Simulator X Rayfield Script (Mobile Compatible)
 
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Pet Simulator 99",
+    LoadingTitle = "Nexten Script Hub",
+    LoadingSubtitle = "By Your Friend Kai",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "PetSimX",
+        FileName = "Config"
+    }
+})
+
+-- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -7,29 +21,29 @@ local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- ===== KEY SYSTEM =====
-local correctKey = "food"
-local success, input = pcall(function()
-    return LocalPlayer:PromptInput("Enter Key:", "")
-end)
-
-if success then
-    if input == correctKey then
-        print("Key correct! Access granted.")
-    else
-        print("Wrong key! Access denied")
-    end
-else
-    print("No key input detected, continuing script.")
-end
-
--- ===== SETTINGS =====
-local SpeedBoost = 200
+-- Settings
+local Speed = 200
 local NoclipEnabled = true
 
--- Apply SpeedBoost
-Humanoid.WalkSpeed = SpeedBoost
-print("SpeedBoost applied!")
+-- SpeedBoost Toggle
+Window:CreateToggle({
+    Name = "SpeedBoost",
+    CurrentValue = true,
+    Flag = "SpeedBoost",
+    Callback = function(value)
+        Humanoid.WalkSpeed = value and Speed or 16
+    end
+})
+
+-- Noclip Toggle
+Window:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = true,
+    Flag = "Noclip",
+    Callback = function(value)
+        NoclipEnabled = value
+    end
+})
 
 -- Noclip Loop
 RunService.Stepped:Connect(function()
@@ -41,7 +55,16 @@ RunService.Stepped:Connect(function()
         end
     end
 end)
-print("Noclip enabled!")
 
--- Coming Soon message
-print("Coming Soon: More features for Pet Simulator X!")
+-- Coming Soon Notification
+Rayfield:Notify({
+    Title = "Coming Soon",
+    Content = "More features for Pet Simulator X!",
+    Duration = 5,
+    Actions = {
+        Ignore = {
+            Name = "Okay",
+            Callback = function() end
+        }
+    }
+})

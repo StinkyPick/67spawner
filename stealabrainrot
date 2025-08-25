@@ -1,10 +1,10 @@
--- Steal a Brainrot Rayfield Script with Save Base & Teleport Back
+-- Steal a Brainrot Rayfield Script (Mobile & Delta Executor Compatible)
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Steal a Brainrot | Nexten",
-    LoadingTitle = "Loading Steal a Brainrot Script",
+    Name = "Steal a Brainrot | Mobile",
+    LoadingTitle = "Loading Script",
     LoadingSubtitle = "By Nexten",
     ConfigurationSaving = {
        Enabled = true,
@@ -22,11 +22,11 @@ local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- Settings
+-- Default Settings
 local Speed = 100
 local JumpPower = 150
 local TeleportDistance = 20
-local BasePosition = RootPart.Position -- default to starting position
+local BasePosition = RootPart.Position
 
 -- Features
 local SpeedToggle = Window:CreateToggle({
@@ -34,11 +34,7 @@ local SpeedToggle = Window:CreateToggle({
     CurrentValue = true,
     Flag = "SpeedToggle",
     Callback = function(value)
-        if value then
-            Humanoid.WalkSpeed = Speed
-        else
-            Humanoid.WalkSpeed = 16
-        end
+        Humanoid.WalkSpeed = value and Speed or 16
     end
 })
 
@@ -47,11 +43,7 @@ local JumpToggle = Window:CreateToggle({
     CurrentValue = true,
     Flag = "JumpToggle",
     Callback = function(value)
-        if value then
-            Humanoid.JumpPower = JumpPower
-        else
-            Humanoid.JumpPower = 50
-        end
+        Humanoid.JumpPower = value and JumpPower or 50
     end
 })
 
@@ -67,14 +59,14 @@ local NoclipToggle = Window:CreateToggle({
     Flag = "Noclip",
 })
 
--- Buttons for Base
+-- Buttons
 Window:CreateButton({
     Name = "Save Base Here",
     Callback = function()
         BasePosition = RootPart.Position
         Rayfield:Notify({
-            Title = "Base Saved!",
-            Content = "Your current position has been saved as Base.",
+            Title = "Base Saved",
+            Content = "Current position saved as base.",
             Duration = 3
         })
     end
@@ -85,8 +77,8 @@ Window:CreateButton({
     Callback = function()
         RootPart.CFrame = CFrame.new(BasePosition)
         Rayfield:Notify({
-            Title = "Teleported!",
-            Content = "You have been teleported to your Base.",
+            Title = "Teleported",
+            Content = "You are now at your base.",
             Duration = 3
         })
     end
@@ -103,7 +95,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- Auto Steal Loop
+-- Auto Steal
 RunService.RenderStepped:Connect(function()
     if AutoStealToggle.CurrentValue then
         local tool = Character:FindFirstChildWhichIsA("Tool")
@@ -123,7 +115,7 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 Rayfield:Notify({
-    Title = "Loaded!",
+    Title = "Loaded",
     Content = "Steal a Brainrot Script Loaded Successfully",
     Duration = 5
 })

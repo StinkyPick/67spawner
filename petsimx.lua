@@ -121,6 +121,25 @@ MainTab:CreateToggle({
     end
 })
 
+--// Auto Steal Brainrot
+local autoSteal = false
+MainTab:CreateToggle({
+    Name = "Auto Steal to Base",
+    CurrentValue = false,
+    Callback = function(v) autoSteal = v end
+})
+
+RunService.Stepped:Connect(function()
+    if autoSteal and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and savedBaseCFrame then
+        local backpack = Player:FindFirstChild("Backpack")
+        local hand = Player:FindFirstChild("Brainrot") or (Player.Character and Player.Character:FindFirstChild("Brainrot"))
+        if hand then
+            -- Teleport to base
+            Player.Character.HumanoidRootPart.CFrame = savedBaseCFrame
+        end
+    end
+end)
+
 --// Anti Kick (Button)
 MainTab:CreateButton({
     Name = "Activate Anti Kick",

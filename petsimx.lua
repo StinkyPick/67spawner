@@ -3,7 +3,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Steal a Brainrot Hub",
-   LoadingTitle = "Steal a Brainrot Hub",
+   LoadingTitle = "Steal a Brainrot",
    LoadingSubtitle = "by yfk",
    ConfigurationSaving = {Enabled = false}
 })
@@ -83,12 +83,22 @@ MainTab:CreateButton({
         end
     end
 })
+
 MainTab:CreateButton({
-    Name = "Go To Base",
+    Name = "Go To Base / Auto Steal",
     Callback = function()
-        if savedBaseCFrame and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = savedBaseCFrame
-            Rayfield:Notify({Title="Teleported",Content="Returned to base!",Duration=3})
+        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            -- Auto detect the base if you are holding Brainrot
+            local brainrot = Player.Backpack:FindFirstChild("Brainrot") or Player.Character:FindFirstChild("Brainrot")
+            if brainrot then
+                -- Set current position as base
+                savedBaseCFrame = Player.Character.HumanoidRootPart.CFrame
+                -- Teleport immediately to base spot
+                Player.Character.HumanoidRootPart.CFrame = savedBaseCFrame
+                Rayfield:Notify({Title="Auto Steal",Content="Teleported to base with Brainrot!",Duration=3})
+            else
+                Rayfield:Notify({Title="Auto Steal",Content="You don't have a Brainrot!",Duration=3})
+            end
         end
     end
 })
@@ -120,25 +130,6 @@ MainTab:CreateToggle({
         end)
     end
 })
-
---// Auto Steal Brainrot
-local autoSteal = false
-MainTab:CreateToggle({
-    Name = "Auto Steal to Base",
-    CurrentValue = false,
-    Callback = function(v) autoSteal = v end
-})
-
-RunService.Stepped:Connect(function()
-    if autoSteal and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and savedBaseCFrame then
-        local backpack = Player:FindFirstChild("Backpack")
-        local hand = Player:FindFirstChild("Brainrot") or (Player.Character and Player.Character:FindFirstChild("Brainrot"))
-        if hand then
-            -- Teleport to base
-            Player.Character.HumanoidRootPart.CFrame = savedBaseCFrame
-        end
-    end
-end)
 
 --// Anti Kick (Button)
 MainTab:CreateButton({

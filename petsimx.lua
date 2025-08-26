@@ -72,7 +72,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
---// Save Base (Automatically detected)
+--// Save / Go To Base
 local savedBaseCFrame
 MainTab:CreateButton({
     Name = "Save Current Spot as Base",
@@ -84,7 +84,6 @@ MainTab:CreateButton({
     end
 })
 
---// Go to Base (Auto detect saved position)
 MainTab:CreateButton({
     Name = "Go To Base",
     Callback = function()
@@ -122,6 +121,20 @@ MainTab:CreateToggle({
                 end
             end
         end)
+    end
+})
+
+--// Teleport Forward Button
+MainTab:CreateButton({
+    Name = "Teleport Forward",
+    Callback = function()
+        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = Player.Character.HumanoidRootPart
+            local forwardVector = hrp.CFrame.LookVector
+            local distance = 20 -- adjust distance as needed
+            hrp.CFrame = hrp.CFrame + forwardVector * distance
+            Rayfield:Notify({Title="Teleported Forward", Content="You moved forward!", Duration=2})
+        end
     end
 })
 

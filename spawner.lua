@@ -1,5 +1,5 @@
 -- // 6 7 Spawner - Grow a Garden (Rayfield UI)
--- // Made for Delta Executor (Local Only)
+-- // Made for Delta Executor (Local Only, No Callback Errors)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -60,33 +60,33 @@ PetsTab:CreateButton({
             return
         end
 
-        -- Create pet in player's inventory
-        local InventoryPet = Instance.new("Model")
+        -- Add pet to player's inventory
+        local InventoryPet = Instance.new("Folder")
         InventoryPet.Name = SelectedPet
         InventoryPet.Parent = PetsFolder
 
-        -- Local-only visual in workspace
-        local Clone = Instance.new("Model")
-        Clone.Name = SelectedPet
-        Clone.Parent = workspace -- only visible locally
+        -- Local visual placeholder
+        local PetVisual = Instance.new("Part")
+        PetVisual.Size = Vector3.new(2,2,2)
+        PetVisual.Anchored = true
+        PetVisual.CanCollide = false
+        PetVisual.Material = Enum.Material.SmoothPlastic
+        PetVisual.Color = Color3.fromRGB(255, 200, 200) -- optional color per pet
+        PetVisual.Name = SelectedPet .. "_Visual"
+        PetVisual.Parent = workspace
 
-        local Part = Instance.new("Part")
-        Part.Name = "HumanoidRootPart"
-        Part.Size = Vector3.new(2,2,2)
-        Part.Anchored = true
-        Part.Parent = Clone
-        Clone.PrimaryPart = Part
-
+        -- Position in front of the player
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            Clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
+            local hrp = player.Character.HumanoidRootPart
+            PetVisual.CFrame = hrp.CFrame * CFrame.new(3,0,0)
         end
 
-        -- Optional floating name
+        -- Billboard name
         local Billboard = Instance.new("BillboardGui")
         Billboard.Size = UDim2.new(0,100,0,50)
         Billboard.StudsOffset = Vector3.new(0,3,0)
-        Billboard.Adornee = Clone.PrimaryPart
-        Billboard.Parent = Clone
+        Billboard.Adornee = PetVisual
+        Billboard.Parent = PetVisual
 
         local Label = Instance.new("TextLabel")
         Label.Size = UDim2.new(1,0,1,0)
@@ -100,7 +100,8 @@ PetsTab:CreateButton({
         SelectedPet = nil
         PetDropdown:SetValue(nil)
 
-        Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." spawned!", Duration=3})
+        -- Notify success
+        Rayfield:Notify({Title="Pet Spawned", Content=InventoryPet.Name.." spawned locally!", Duration=3})
     end
 })
 

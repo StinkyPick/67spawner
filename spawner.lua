@@ -1,5 +1,5 @@
 -- // 6 7 Spawner - Grow a Garden (Rayfield UI)
--- // Made for Delta Executor / Studio simulation
+-- // Made for Delta Executor
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -7,16 +7,16 @@ local Window = Rayfield:CreateWindow({
     Name = "6 7 Spawner",
     LoadingTitle = "6 7 Spawner",
     LoadingSubtitle = "by Your Friend Kai",
-    ConfigurationSaving = { Enabled = false } -- do not save selections
+    ConfigurationSaving = { Enabled = false }
 })
 
 local player = game.Players.LocalPlayer
 
--- Ensure a "Pets" folder exists in the player
+-- Make sure player has Pets folder
 if not player:FindFirstChild("Pets") then
-    local Inventory = Instance.new("Folder")
-    Inventory.Name = "Pets"
-    Inventory.Parent = player
+    local folder = Instance.new("Folder")
+    folder.Name = "Pets"
+    folder.Parent = player
 end
 
 local PetsFolder = player:FindFirstChild("Pets")
@@ -36,9 +36,9 @@ local Pets = {
 
 local SelectedPet = nil
 
--- Pets category UI
+-- Pets UI tab
 local PetsTab = Window:CreateTab("Pets", 4483362458)
-local Section = PetsTab:CreateSection("Pet Spawner")
+PetsTab:CreateSection("Pet Spawner")
 
 -- Dropdown to select pet
 local PetDropdown = PetsTab:CreateDropdown({
@@ -52,59 +52,59 @@ local PetDropdown = PetsTab:CreateDropdown({
     end
 })
 
--- Button to spawn pet
+-- Spawn Pet button
 PetsTab:CreateButton({
     Name = "Spawn Pet",
     Callback = function()
-        if SelectedPet then
-            -- Create a new pet model in inventory
-            local InventoryPet = Instance.new("Model")
-            InventoryPet.Name = SelectedPet
-            InventoryPet.Parent = PetsFolder
-
-            -- Add a simple Part as PrimaryPart
-            local Part = Instance.new("Part")
-            Part.Name = "HumanoidRootPart"
-            Part.Size = Vector3.new(2,2,2)
-            Part.Anchored = true
-            Part.Parent = InventoryPet
-            InventoryPet.PrimaryPart = Part
-
-            -- Clone the pet into workspace so everyone can see
-            local Clone = InventoryPet:Clone()
-            Clone.Parent = workspace
-            Clone.PrimaryPart.Anchored = true
-
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = player.Character.HumanoidRootPart
-                Clone:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(3,0,0))
-            end
-
-            -- Optional: Add floating NameLabel
-            local Billboard = Instance.new("BillboardGui")
-            Billboard.Size = UDim2.new(0,100,0,50)
-            Billboard.StudsOffset = Vector3.new(0,3,0)
-            Billboard.Adornee = Clone.PrimaryPart
-            Billboard.Parent = Clone
-
-            local Label = Instance.new("TextLabel")
-            Label.Size = UDim2.new(1,0,1,0)
-            Label.BackgroundTransparency = 1
-            Label.Text = SelectedPet
-            Label.TextColor3 = Color3.fromRGB(255,255,255)
-            Label.TextScaled = true
-            Label.Parent = Billboard
-
-            -- Reset selection
-            SelectedPet = nil
-            PetDropdown:SetValue(nil)
-
-            Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." spawned in inventory and workspace!", Duration=3})
-        else
+        if not SelectedPet then
             Rayfield:Notify({Title="Error", Content="No pet selected!", Duration=3})
+            return
         end
+
+        -- Create inventory model
+        local InventoryPet = Instance.new("Model")
+        InventoryPet.Name = SelectedPet
+        InventoryPet.Parent = PetsFolder
+
+        -- Add a simple PrimaryPart to avoid errors
+        local Part = Instance.new("Part")
+        Part.Name = "HumanoidRootPart"
+        Part.Size = Vector3.new(2,2,2)
+        Part.Anchored = true
+        Part.Parent = InventoryPet
+        InventoryPet.PrimaryPart = Part
+
+        -- Clone into workspace so everyone sees it
+        local Clone = InventoryPet:Clone()
+        Clone.Parent = workspace
+        Clone.PrimaryPart.Anchored = true
+
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            Clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
+        end
+
+        -- Add floating name above pet
+        local Billboard = Instance.new("BillboardGui")
+        Billboard.Size = UDim2.new(0,100,0,50)
+        Billboard.StudsOffset = Vector3.new(0,3,0)
+        Billboard.Adornee = Clone.PrimaryPart
+        Billboard.Parent = Clone
+
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(1,0,1,0)
+        Label.BackgroundTransparency = 1
+        Label.Text = SelectedPet
+        Label.TextColor3 = Color3.fromRGB(255,255,255)
+        Label.TextScaled = true
+        Label.Parent = Billboard
+
+        -- Reset dropdown
+        SelectedPet = nil
+        PetDropdown:SetValue(nil)
+
+        Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." spawned in inventory and workspace!", Duration=3})
     end
 })
 
--- Load configuration
+-- Load Rayfield config
 Rayfield:LoadConfiguration()

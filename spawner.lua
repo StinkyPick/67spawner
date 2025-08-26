@@ -12,13 +12,12 @@ local Window = Rayfield:CreateWindow({
 
 local player = game.Players.LocalPlayer
 
--- Make sure player has Pets folder
+-- Ensure Pets folder exists
 if not player:FindFirstChild("Pets") then
     local folder = Instance.new("Folder")
     folder.Name = "Pets"
     folder.Parent = player
 end
-
 local PetsFolder = player:FindFirstChild("Pets")
 
 -- List of Grow a Garden pets
@@ -36,7 +35,7 @@ local Pets = {
 
 local SelectedPet = nil
 
--- Pets UI tab
+-- Pets tab UI
 local PetsTab = Window:CreateTab("Pets", 4483362458)
 PetsTab:CreateSection("Pet Spawner")
 
@@ -61,12 +60,12 @@ PetsTab:CreateButton({
             return
         end
 
-        -- Create inventory model
+        -- Add pet to inventory
         local InventoryPet = Instance.new("Model")
         InventoryPet.Name = SelectedPet
         InventoryPet.Parent = PetsFolder
 
-        -- Add a simple PrimaryPart to avoid errors
+        -- Simple placeholder part as PrimaryPart
         local Part = Instance.new("Part")
         Part.Name = "HumanoidRootPart"
         Part.Size = Vector3.new(2,2,2)
@@ -80,10 +79,11 @@ PetsTab:CreateButton({
         Clone.PrimaryPart.Anchored = true
 
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            Clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
+            local hrp = player.Character.HumanoidRootPart
+            Clone:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(3,0,0))
         end
 
-        -- Add floating name above pet
+        -- Floating name above pet
         local Billboard = Instance.new("BillboardGui")
         Billboard.Size = UDim2.new(0,100,0,50)
         Billboard.StudsOffset = Vector3.new(0,3,0)
@@ -98,13 +98,13 @@ PetsTab:CreateButton({
         Label.TextScaled = true
         Label.Parent = Billboard
 
-        -- Reset dropdown
+        -- Reset selection
         SelectedPet = nil
         PetDropdown:SetValue(nil)
 
-        Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." spawned in inventory and workspace!", Duration=3})
+        -- Notify Spawned
+        Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." has spawned!", Duration=3})
     end
 })
 
--- Load Rayfield config
 Rayfield:LoadConfiguration()

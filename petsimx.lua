@@ -3,7 +3,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Steal a Brainrot Hub",
-   LoadingTitle = "Steal a Brainrot",
+   LoadingTitle = "Steal a Brainrot Hub",
    LoadingSubtitle = "by yfk",
    ConfigurationSaving = {Enabled = false}
 })

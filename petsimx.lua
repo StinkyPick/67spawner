@@ -124,7 +124,7 @@ MainTab:CreateToggle({
     end
 })
 
---// Teleport Forward Button
+--// Teleport Forward (relative to current position)
 MainTab:CreateButton({
     Name = "Teleport Forward",
     Callback = function()
@@ -133,7 +133,7 @@ MainTab:CreateButton({
             local forwardVector = hrp.CFrame.LookVector
             local distance = 20 -- adjust distance as needed
             hrp.CFrame = hrp.CFrame + forwardVector * distance
-            Rayfield:Notify({Title="Teleported Forward", Content="You moved forward!", Duration=2})
+            Rayfield:Notify({Title="Teleported Forward", Content="Moved forward relative to current position!", Duration=2})
         end
     end
 })

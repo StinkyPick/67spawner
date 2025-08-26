@@ -72,33 +72,27 @@ RunService.Stepped:Connect(function()
     end
 end)
 
---// Save / Go To Base
+--// Save Base (Automatically detected)
 local savedBaseCFrame
 MainTab:CreateButton({
-    Name = "Save Base Spot",
+    Name = "Save Current Spot as Base",
     Callback = function()
         if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
             savedBaseCFrame = Player.Character.HumanoidRootPart.CFrame
-            Rayfield:Notify({Title="Base Saved",Content="Base spot saved!",Duration=3})
+            Rayfield:Notify({Title="Base Saved",Content="Current spot saved as base!",Duration=3})
         end
     end
 })
 
+--// Go to Base (Auto detect saved position)
 MainTab:CreateButton({
-    Name = "Go To Base / Auto Steal",
+    Name = "Go To Base",
     Callback = function()
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            -- Auto detect the base if you are holding Brainrot
-            local brainrot = Player.Backpack:FindFirstChild("Brainrot") or Player.Character:FindFirstChild("Brainrot")
-            if brainrot then
-                -- Set current position as base
-                savedBaseCFrame = Player.Character.HumanoidRootPart.CFrame
-                -- Teleport immediately to base spot
-                Player.Character.HumanoidRootPart.CFrame = savedBaseCFrame
-                Rayfield:Notify({Title="Auto Steal",Content="Teleported to base with Brainrot!",Duration=3})
-            else
-                Rayfield:Notify({Title="Auto Steal",Content="You don't have a Brainrot!",Duration=3})
-            end
+        if savedBaseCFrame and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = savedBaseCFrame
+            Rayfield:Notify({Title="Teleported",Content="Teleported to your base!",Duration=3})
+        else
+            Rayfield:Notify({Title="Error",Content="No base saved yet!",Duration=3})
         end
     end
 })

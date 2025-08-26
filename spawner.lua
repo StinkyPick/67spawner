@@ -1,5 +1,5 @@
 -- // 6 7 Spawner - Grow a Garden (Rayfield UI)
--- // Made for Delta Executor
+-- // Made for Delta Executor (Local Only)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -60,30 +60,28 @@ PetsTab:CreateButton({
             return
         end
 
-        -- Add pet to inventory
+        -- Create pet in player's inventory
         local InventoryPet = Instance.new("Model")
         InventoryPet.Name = SelectedPet
         InventoryPet.Parent = PetsFolder
 
-        -- Simple placeholder part as PrimaryPart
+        -- Local-only visual in workspace
+        local Clone = Instance.new("Model")
+        Clone.Name = SelectedPet
+        Clone.Parent = workspace -- only visible locally
+
         local Part = Instance.new("Part")
         Part.Name = "HumanoidRootPart"
         Part.Size = Vector3.new(2,2,2)
         Part.Anchored = true
-        Part.Parent = InventoryPet
-        InventoryPet.PrimaryPart = Part
-
-        -- Clone into workspace so everyone sees it
-        local Clone = InventoryPet:Clone()
-        Clone.Parent = workspace
-        Clone.PrimaryPart.Anchored = true
+        Part.Parent = Clone
+        Clone.PrimaryPart = Part
 
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = player.Character.HumanoidRootPart
-            Clone:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(3,0,0))
+            Clone:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(3,0,0))
         end
 
-        -- Floating name above pet
+        -- Optional floating name
         local Billboard = Instance.new("BillboardGui")
         Billboard.Size = UDim2.new(0,100,0,50)
         Billboard.StudsOffset = Vector3.new(0,3,0)
@@ -102,8 +100,7 @@ PetsTab:CreateButton({
         SelectedPet = nil
         PetDropdown:SetValue(nil)
 
-        -- Notify Spawned
-        Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." has spawned!", Duration=3})
+        Rayfield:Notify({Title="Pet Spawned", Content=Clone.Name.." spawned!", Duration=3})
     end
 })
 
